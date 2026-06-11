@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>山东省居民电费计算器</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-grad: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: var(--bg-grad);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .policy-tag {
+            display: inline-block;
+            background: rgba(30, 58, 138, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            color: var(--text-sub);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .unit {
+            position: absolute;
+            right: 12px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .switch-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .switch-label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(18px);
+        }
+
+        .result-panel {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .result-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+
+        .result-subline {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .tier-viz {
+            margin-top: 25px;
+        }
+
+        .tier-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .tier-1 {
+            background: #10b981;
+        }
+
+        .tier-2 {
+            background: #fbbf24;
+        }
+
+        .tier-3 {
+            background: #ef4444;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            border: none;
+        }
+
+        .detail-val {
+            font-weight: 600;
+        }
+
+        .note-box {
+            margin-top: 20px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>山东省居民阶梯电费计算器</h1>
+            <div class="policy-tag">政策标准：鲁发改价格〔2019〕509号</div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <div class="section-title">计费设置</div>
+
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="setMode('SINGLE', this)">一户一表</button>
+                    <button class="mode-btn" onclick="setMode('TOU', this)">分时电价</button>
+                    <button class="mode-btn" onclick="setMode('JOINT', this)">合表用户</button>
+                </div>
+
+                <div class="switch-card">
+                    <span class="switch-label">一户多人口 (5人及以上)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="isMulti" onchange="calc()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="switch-card">
+                    <span class="switch-label">低保/五保户 (-15度/月)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="isSubsidy" onchange="calc()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div id="heatingToggle" class="switch-card" style="display:none;">
+                    <span class="switch-label">当前处于 采暖期 (11-3月)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="isHeating" onchange="calc()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="section-title" style="margin-top:25px;">能耗核算</div>
+
+                <div class="form-group">
+                    <label>计算天数</label>
+                    <div class="input-group">
+                        <input type="number" id="days" value="30" oninput="calc()">
+                        <span class="unit">天</span>
+                    </div>
+                </div>
+
+                <div class="mode-selector">
+                    <button id="btnPower" class="mode-btn active" onclick="setInput('POWER')">功率核算</button>
+                    <button id="btnDirect" class="mode-btn" onclick="setInput('DIRECT')">直输电量</button>
+                </div>
+
+                <div id="powerGroup">
+                    <div class="form-group">
+                        <label>工作功率 (W)</label>
+                        <input type="number" id="pWork" value="500" oninput="calc()">
+                    </div>
+                    <div class="form-group">
+                        <label>每日工作时长 (h)</label>
+                        <input type="number" id="hWork" value="10" max="24" oninput="calc()">
+                    </div>
+                    <div class="form-group">
+                        <label>待机功率 (W)</label>
+                        <input type="number" id="pIdle" value="170" oninput="calc()">
+                    </div>
+                </div>
+
+                <div id="directGroup" style="display:none;">
+                    <div class="form-group">
+                        <label>总用电量 (kWh)</label>
+                        <input type="number" id="qTotal" value="300" oninput="calc()">
+                    </div>
+                    <div id="ratioSection" style="display:none;">
+                        <label>峰电占比 (%)</label>
+                        <input type="number" id="peakRatio" value="60" oninput="calc()">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="result-panel">
+                    <div class="result-label">预计总支出</div>
+                    <div class="result-value">¥<span id="resPrice">0.00</span></div>
+                    <div class="result-subline">
+                        用电 <span id="resUsage">0</span> 度 | 均价 <span id="resAvg">0.000</span> 元
+                    </div>
+
+                    <div class="tier-viz">
+                        <div class="tier-bar">
+                            <div id="v1" class="tier-1" style="width:33%"></div>
+                            <div id="v2" class="tier-2" style="width:33%"></div>
+                            <div id="v3" class="tier-3" style="width:33%"></div>
+                        </div>
+                        <div id="tier-legend"
+                            style="display:flex; justify-content:space-around; font-size:11px; margin-top:8px; font-weight:600;">
+                            <span id="l1" style="color:#10b981; transition:0.3s;">● 一档</span>
+                            <span id="l2" style="color:#fbbf24; transition:0.3s;">● 二档</span>
+                            <span id="l3" style="color:#ef4444; transition:0.3s;">● 三档</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title">费用明细</div>
+                    <div class="detail-row"><span>计费模式</span><span id="detMode" class="detail-val">-</span></div>
+                    <div class="detail-row"><span>阶梯一档限额</span><span class="detail-val"><span id="detT1">210</span>
+                            度</span></div>
+                    <div class="detail-row"><span>阶梯加价总额</span><span class="detail-val">¥<span
+                                id="detStep">0.00</span></span></div>
+                    <div class="detail-row" id="detTouRow" style="display:none;"><span>峰/谷电分配</span><span
+                            class="detail-val"><span id="detP">0</span>/<span id="detV">0</span> 度</span></div>
+                    <div class="detail-row" id="detSubRow" style="display:none;"><span>政策补贴</span><span
+                            class="detail-val" style="color:var(--success)">- <span id="detSub">0</span> 度</span></div>
+                </div>
+
+                <div class="note-box">
+                    <strong>计费参考：</strong><br>
+                    • 阶梯分档(月)：一档≤210 (5人户310)；二档210-400；三档>400。<br>
+                    • 分时时段：峰段 8:00-22:00 (采暖期 8:00-20:00)。<br>
+                    • 价格(元)：一/二/三档单价为 0.5469 / 0.5969 / 0.8469。<br>
+                    • 分时基价：峰 0.5769 / 谷 0.3769 (采暖期谷 0.3469)。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'SINGLE';
+        let input = 'POWER';
+
+        const DATA = {
+            SINGLE: [0.5469, 0.5969, 0.8469],
+            JOINT: 0.5550,
+            TOU: {
+                normal: { p: 0.5769, v: 0.3769 },
+                heating: { p: 0.5769, v: 0.3469 },
+                add: [0, 0.05, 0.3]
+            }
+        };
+
+        function setMode(m, b) {
+            mode = m;
+            document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            document.getElementById('heatingToggle').style.display = m === 'TOU' ? 'flex' : 'none';
+            document.getElementById('ratioSection').style.display = (m === 'TOU' && input === 'DIRECT') ? 'block' : 'none';
+            calc();
+        }
+
+        function setInput(i) {
+            input = i;
+            document.getElementById('btnPower').classList.toggle('active', i === 'POWER');
+            document.getElementById('btnDirect').classList.toggle('active', i === 'DIRECT');
+            document.getElementById('powerGroup').style.display = i === 'POWER' ? 'block' : 'none';
+            document.getElementById('directGroup').style.display = i === 'DIRECT' ? 'block' : 'none';
+            document.getElementById('ratioSection').style.display = (mode === 'TOU' && i === 'DIRECT') ? 'block' : 'none';
+            calc();
+        }
+
+        function calc() {
+            const days = parseFloat(document.getElementById('days').value) || 0;
+            const months = Math.ceil(days / 30) || 1;
+            let q = 0, qP = 0, qV = 0;
+
+            if (input === 'POWER') {
+                const wP = (parseFloat(document.getElementById('pWork').value) || 0) / 1000;
+                const wH = parseFloat(document.getElementById('hWork').value) || 0;
+                const iP = (parseFloat(document.getElementById('pIdle').value) || 0) / 1000;
+                const iH = Math.max(0, 24 - wH);
+
+                if (mode === 'TOU') {
+                    const isH = document.getElementById('isHeating').checked;
+                    const pLimit = isH ? 12 : 14; // 8-20 vs 8-22
+                    const wP_in = Math.min(wH, pLimit);
+                    const wV_in = wH - wP_in;
+                    const iP_in = pLimit - wP_in;
+                    const iV_in = (24 - pLimit) - wV_in;
+                    qP = (wP_in * wP + iP_in * iP) * days;
+                    qV = (wV_in * wP + iV_in * iP) * days;
+                    q = qP + qV;
+                } else {
+                    q = (wP * wH + iP * iH) * days;
+                }
+            } else {
+                q = parseFloat(document.getElementById('qTotal').value) || 0;
+                if (mode === 'TOU') {
+                    const r = (parseFloat(document.getElementById('peakRatio').value) || 0) / 100;
+                    qP = q * r; qV = q * (1 - r);
+                }
+            }
+
+            let sub = 0;
+            if (document.getElementById('isSubsidy').checked) {
+                sub = 15 * months;
+                const actual = Math.min(q, sub);
+                if (q > 0) {
+                    if (mode === 'TOU') { const r = qP / q; qP -= actual * r; qV -= actual * (1 - r); }
+                    q -= actual;
+                }
+            }
+
+            const isM = document.getElementById('isMulti').checked;
+            const t1 = (isM ? 310 : 210) * months;
+            const t2 = 400 * months;
+
+            let cost = 0, stepAdd = 0;
+            let q1 = 0, q2 = 0, q3 = 0;
+            if (q <= t1) { q1 = q; }
+            else if (q <= t2) { q1 = t1; q2 = q - t1; }
+            else { q1 = t1; q2 = t2 - t1; q3 = q - t2; }
+
+            if (mode === 'JOINT') { cost = q * DATA.JOINT; }
+            else if (mode === 'SINGLE') { cost = q1 * DATA.SINGLE[0] + q2 * DATA.SINGLE[1] + q3 * DATA.SINGLE[2]; stepAdd = cost - q * DATA.SINGLE[0]; }
+            else {
+                const isH = document.getElementById('isHeating').checked;
+                const set = isH ? DATA.TOU.heating : DATA.TOU.normal;
+                cost = qP * set.p + qV * set.v + q2 * DATA.TOU.add[1] + q3 * DATA.TOU.add[2];
+                stepAdd = q2 * DATA.TOU.add[1] + q3 * DATA.TOU.add[2];
+            }
+
+            document.getElementById('resPrice').innerText = cost.toFixed(2);
+            document.getElementById('resUsage').innerText = q.toFixed(1);
+            document.getElementById('resAvg').innerText = q > 0 ? (cost / q).toFixed(3) : '0.000';
+
+            document.getElementById('v1').style.width = (q1 / (q || 1) * 100) + '%';
+            document.getElementById('v2').style.width = (q2 / (q || 1) * 100) + '%';
+            document.getElementById('v3').style.width = (q3 / (q || 1) * 100) + '%';
+
+            // 高亮当前所属或包含的档位图例
+            document.getElementById('l1').style.opacity = q1 > 0 ? '1' : '0.2';
+            document.getElementById('l2').style.opacity = q2 > 0 ? '1' : '0.2';
+            document.getElementById('l3').style.opacity = q3 > 0 ? '1' : '0.2';
+            
+            // 如果只有一档有值，放大其标识；如果有更高档位，强调最高档位
+            document.getElementById('l1').style.transform = (q2 === 0 && q3 === 0) ? 'scale(1.1)' : 'scale(1)';
+            document.getElementById('l2').style.transform = (q2 > 0 && q3 === 0) ? 'scale(1.1)' : 'scale(1)';
+            document.getElementById('l3').style.transform = (q3 > 0) ? 'scale(1.1)' : 'scale(1)';
+
+            document.getElementById('detMode').innerText = mode === 'SINGLE' ? '一户一表' : (mode === 'TOU' ? '分时电价' : '合表用户');
+            document.getElementById('detT1').innerText = t1;
+            document.getElementById('detStep').innerText = stepAdd.toFixed(2);
+            document.getElementById('detTouRow').style.display = mode === 'TOU' ? 'flex' : 'none';
+            document.getElementById('detP').innerText = qP.toFixed(1);
+            document.getElementById('detV').innerText = qV.toFixed(1);
+            document.getElementById('detSubRow').style.display = sub > 0 ? 'flex' : 'none';
+            document.getElementById('detSub').innerText = sub;
+        }
+
+        calc();
+    </script>
+
+</body>
+
+</html>

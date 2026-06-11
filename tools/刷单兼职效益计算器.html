@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>刷单/兼职效益计算器</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-grad: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --border: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: var(--bg-grad);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .policy-tag {
+            display: inline-block;
+            background: rgba(30, 58, 138, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+        .mode-selector {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: transparent;
+            color: var(--text-sub);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .mode-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+            background: white;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        .unit {
+            position: absolute;
+            right: 12px;
+            color: #94a3b8;
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        .result-panel {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .result-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .result-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+
+        .result-subline {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 14px;
+        }
+
+        .detail-row:last-child {
+            border: none;
+        }
+
+        .detail-val {
+            font-weight: 600;
+        }
+
+        .result-highlight {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f0fdf4;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .result-highlight .rh-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        .result-highlight .rh-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--success);
+        }
+
+        .note-box {
+            margin-top: 20px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .profit-per-order {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .profit-per-order .ppo-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .profit-per-order .ppo-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .expect-form-hidden {
+            display: none;
+        }
+
+        .form-disabled label {
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>刷单/兼职效益计算器</h1>
+            <div class="policy-tag">收益风险 · 时薪评估 · 期望测算</div>
+        </div>
+
+        <div class="main-grid">
+            <div>
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="section-title">基础信息</div>
+
+                    <div class="form-group">
+                        <label>收益（每单）</label>
+                        <div class="input-group">
+                            <input type="number" id="profitPerOrder" value="0" step="0.01" oninput="calc()">
+                            <span class="unit">元</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>错误惩罚（每单）</label>
+                        <div class="input-group">
+                            <input type="number" id="penaltyPerOrder" value="0" step="0.01" oninput="calc()">
+                            <span class="unit">元</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>成功率</label>
+                        <div class="input-group">
+                            <input type="number" id="successRate" value="100" min="0" max="100" oninput="calc()">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>保证金额</label>
+                        <div class="input-group">
+                            <input type="number" id="deposit" value="0" step="0.01" oninput="calc()">
+                            <span class="unit">元</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>每单时间</label>
+                        <div class="input-group">
+                            <input type="number" id="timePerOrder" value="0" min="0" step="0.01" oninput="calc()">
+                            <span class="unit" id="tpoUnitLabel">分钟</span>
+                        </div>
+                    </div>
+
+                    <div class="mode-selector" id="tpoSelector">
+                        <button class="mode-btn" onclick="setTPOU('sec', this)">秒</button>
+                        <button class="mode-btn active" onclick="setTPOU('min', this)">分</button>
+                        <button class="mode-btn" onclick="setTPOU('hour', this)">小时</button>
+                        <button class="mode-btn" onclick="setTPOU('day', this)">天</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title">个人期望</div>
+
+                    <div class="mode-selector" id="expectModeSelector">
+                        <button class="mode-btn active" onclick="setExpectMode('time', this)">按时间计算</button>
+                        <button class="mode-btn" onclick="setExpectMode('profit', this)">按收益计算</button>
+                    </div>
+
+                    <div id="expectTimeBlock">
+                        <div class="form-group">
+                            <label>做单时间</label>
+                            <div class="input-group">
+                                <input type="number" id="expectedTime" value="1" min="0" step="0.01" oninput="calc()">
+                                <span class="unit" id="etUnitLabel">小时</span>
+                            </div>
+                        </div>
+
+                        <div class="mode-selector" id="etSelector">
+                            <button class="mode-btn" onclick="setETU('sec', this)">秒</button>
+                            <button class="mode-btn" onclick="setETU('min', this)">分</button>
+                            <button class="mode-btn active" onclick="setETU('hour', this)">小时</button>
+                            <button class="mode-btn" onclick="setETU('day', this)">天</button>
+                        </div>
+                    </div>
+
+                    <div id="expectProfitBlock" class="expect-form-hidden">
+                        <div class="form-group">
+                            <label>期望收益</label>
+                            <div class="input-group">
+                                <input type="number" id="expectedProfit" value="10" step="0.01" oninput="calc()">
+                                <span class="unit">元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="card">
+                    <div class="section-title">基础信息计算结果</div>
+
+                    <div class="profit-per-order">
+                        <span class="ppo-label">每单期望收益</span>
+                        <span class="ppo-value">¥<span id="resExpectPerOrder">0.00</span></span>
+                    </div>
+
+                    <div class="result-highlight">
+                        <span class="rh-label">获取收益需要单数</span>
+                        <span class="rh-value"><span id="resOrdersNeeded">0</span> 单</span>
+                    </div>
+
+                    <div class="result-highlight">
+                        <span class="rh-label">获取收益所需时间</span>
+                        <span class="rh-value"><span id="resTimeNeeded">0</span> <span id="resTimeNeededUnitLabel">小时</span></span>
+                    </div>
+
+                    <div class="mode-selector" id="tnSelector" style="margin-top: 10px; margin-bottom: 16px;">
+                        <button class="mode-btn" onclick="setTNU('sec', this)">秒</button>
+                        <button class="mode-btn" onclick="setTNU('min', this)">分</button>
+                        <button class="mode-btn active" onclick="setTNU('hour', this)">小时</button>
+                        <button class="mode-btn" onclick="setTNU('day', this)">天</button>
+                    </div>
+
+                    <div class="result-highlight">
+                        <span class="rh-label">等效薪资（忽略保证金）</span>
+                        <span class="rh-value">¥<span id="resSalary">0</span>/<span id="resSalaryUnitLabel">小时</span></span>
+                    </div>
+
+                    <div class="mode-selector" id="salSelector" style="margin-top: 10px; margin-bottom: 0;">
+                        <button class="mode-btn active" onclick="setSalU('hour', this)">元/小时</button>
+                        <button class="mode-btn" onclick="setSalU('day', this)">元/天</button>
+                        <button class="mode-btn" onclick="setSalU('week', this)">元/周</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title">个人期望计算结果</div>
+
+                    <div id="expectResultTime">
+                        <div class="result-highlight">
+                            <span class="rh-label">投入时间内做单收益</span>
+                            <span class="rh-value">¥<span id="resTimeProfit">0.00</span></span>
+                        </div>
+                    </div>
+
+                    <div id="expectResultProfit" class="expect-form-hidden">
+                        <div class="result-highlight">
+                            <span class="rh-label">获取期望收益所需时间</span>
+                            <span class="rh-value"><span id="resProfitTime">0</span> <span id="resPTUnitLabel">小时</span></span>
+                        </div>
+
+                        <div class="mode-selector" id="ptSelector" style="margin-top: 10px; margin-bottom: 10px;">
+                            <button class="mode-btn" onclick="setPTU('min', this)">分钟</button>
+                            <button class="mode-btn active" onclick="setPTU('hour', this)">小时</button>
+                            <button class="mode-btn" onclick="setPTU('day', this)">天</button>
+                        </div>
+                    </div>
+
+                    <div class="note-box">
+                        <strong>说明：</strong><br>
+                        • 每单期望收益 = 收益 × 成功率 - 错误惩罚 × (1 - 成功率)<br>
+                        • 获取收益需要单数 = 保证金额 ÷ 每单期望收益<br>
+                        • 等效薪资忽略保证金额，仅按每单期望收益和时间计算<br>
+                        • 个人期望部分不考虑保证金额投入
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tpoUnit = 'min';
+        let etUnit = 'hour';
+        let tnUnit = 'hour';
+        let salUnit = 'hour';
+        let ptUnit = 'hour';
+        let expectMode = 'time';
+
+        const U2S = { sec: 1, min: 60, hour: 3600, day: 86400 };
+        const UL = { sec: '秒', min: '分钟', hour: '小时', day: '天' };
+        const SL = { hour: '小时', day: '天', week: '周' };
+        const SD = { hour: 3600, day: 86400, week: 604800 };
+
+        function syncBtns(selectorId, activeLabel) {
+            const btns = document.getElementById(selectorId).querySelectorAll('.mode-btn');
+            btns.forEach(b => b.classList.toggle('active', b.innerText === activeLabel));
+        }
+
+        function setTPOU(u, btn) {
+            tpoUnit = u;
+            document.getElementById('tpoUnitLabel').innerText = UL[u];
+            syncBtns('tpoSelector', btn.innerText);
+            calc();
+        }
+
+        function setETU(u, btn) {
+            etUnit = u;
+            document.getElementById('etUnitLabel').innerText = UL[u];
+            syncBtns('etSelector', btn.innerText);
+            calc();
+        }
+
+        function setTNU(u, btn) {
+            tnUnit = u;
+            document.getElementById('resTimeNeededUnitLabel').innerText = UL[u];
+            syncBtns('tnSelector', btn.innerText);
+            calc();
+        }
+
+        function setSalU(u, btn) {
+            salUnit = u;
+            document.getElementById('resSalaryUnitLabel').innerText = SL[u];
+            syncBtns('salSelector', btn.innerText);
+            calc();
+        }
+
+        function setPTU(u, btn) {
+            ptUnit = u;
+            document.getElementById('resPTUnitLabel').innerText = UL[u];
+            syncBtns('ptSelector', btn.innerText);
+            calc();
+        }
+
+        function setExpectMode(mode, btn) {
+            expectMode = mode;
+            syncBtns('expectModeSelector', btn.innerText);
+
+            const timeBlock = document.getElementById('expectTimeBlock');
+            const profitBlock = document.getElementById('expectProfitBlock');
+            const resultTime = document.getElementById('expectResultTime');
+            const resultProfit = document.getElementById('expectResultProfit');
+
+            if (mode === 'time') {
+                timeBlock.classList.remove('expect-form-hidden');
+                profitBlock.classList.add('expect-form-hidden');
+                resultTime.classList.remove('expect-form-hidden');
+                resultProfit.classList.add('expect-form-hidden');
+                document.getElementById('expectedProfit').value = '';
+            } else {
+                timeBlock.classList.add('expect-form-hidden');
+                profitBlock.classList.remove('expect-form-hidden');
+                resultTime.classList.add('expect-form-hidden');
+                resultProfit.classList.remove('expect-form-hidden');
+                document.getElementById('expectedTime').value = '';
+            }
+            calc();
+        }
+
+        function pv(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+
+        function calc() {
+            const profit = pv('profitPerOrder');
+            const penalty = pv('penaltyPerOrder');
+            const successRate = Math.min(Math.max(pv('successRate'), 0), 100) / 100;
+            const deposit = pv('deposit');
+            const timePerOrder = pv('timePerOrder');
+
+            const tpoSec = timePerOrder * U2S[tpoUnit];
+            const expectPO = profit * successRate - penalty * (1 - successRate);
+
+            const ordersNeeded = expectPO > 0 ? Math.ceil(deposit / expectPO) : Infinity;
+            const tnSec = ordersNeeded * tpoSec;
+            const tnDisplay = tnSec / U2S[tnUnit];
+            const salDisplay = tnSec > 0 ? (deposit / tnSec * SD[salUnit]) : 0;
+
+            document.getElementById('resExpectPerOrder').innerText = expectPO.toFixed(2);
+            document.getElementById('resOrdersNeeded').innerText = ordersNeeded === Infinity ? '∞' : ordersNeeded;
+            document.getElementById('resTimeNeeded').innerText = isFinite(tnDisplay) ? tnDisplay.toFixed(2) : '∞';
+            document.getElementById('resSalary').innerText = isFinite(salDisplay) ? salDisplay.toFixed(2) : '∞';
+
+            if (expectMode === 'time') {
+                const et = pv('expectedTime');
+                const etSec = et * U2S[etUnit];
+                const ordersInTime = tpoSec > 0 ? Math.floor(etSec / tpoSec) : 0;
+                const timeProfit = ordersInTime * expectPO;
+                document.getElementById('resTimeProfit').innerText = timeProfit.toFixed(2);
+            } else {
+                const ep = pv('expectedProfit');
+                const ordersForProfit = expectPO > 0 ? Math.ceil(ep / expectPO) : Infinity;
+                const ptSec = ordersForProfit * tpoSec;
+                const ptDisplay = ptSec / U2S[ptUnit];
+                document.getElementById('resProfitTime').innerText = isFinite(ptDisplay) ? ptDisplay.toFixed(2) : '∞';
+            }
+        }
+
+        calc();
+    </script>
+
+</body>
+
+</html>
