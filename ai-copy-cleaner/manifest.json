@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "AI对话纯文本复制",
+  "version": "1.0",
+  "description": "为AI对话气泡追加“复制纯文本”按钮，离线本地运行",
+  "permissions": ["clipboardWrite"],
+  "host_permissions": [
+    "https://chat.deepseek.com/*",
+    "https://doubao.com/*",
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://gemini.google.com/*",
+    "https://kimi.moonshot.cn/*",
+    "https://tongyi.aliyun.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.deepseek.com/*",
+        "https://doubao.com/*",
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://tongyi.aliyun.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["style.css"]
+    }
+  ]
+}
