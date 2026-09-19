@@ -1,1 +1,392 @@
-创建考点复习计划表
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>70个考点 · 35天艾宾浩斯复习计划表</title>
+<style>
+  :root{
+    --brand:#4f46e5;
+    --brand-2:#7c3aed;
+    --new:#059669;
+    --new-bg:#ecfdf5;
+    --rev:#d97706;
+    --rev-bg:#fffbeb;
+    --line:#e6e8f0;
+    --text:#1f2430;
+    --muted:#6b7280;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",
+      "Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:#f4f5fa;color:var(--text);line-height:1.6;padding-bottom:40px;
+  }
+  header{
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    color:#fff;padding:26px 18px 34px;text-align:center;
+  }
+  header h1{margin:0 0 6px;font-size:clamp(19px,4.8vw,26px);letter-spacing:.5px;}
+  header p{margin:0;font-size:clamp(12px,3.2vw,14px);opacity:.92;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 14px;}
+
+  /* ---------- 控制面板 ---------- */
+  .panel{
+    background:#fff;border-radius:14px;padding:14px 16px;margin-top:-20px;
+    box-shadow:0 6px 22px rgba(31,36,48,.10);
+    position:relative;z-index:2;
+  }
+  .row1{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;}
+  .panel label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;}
+  input[type="date"]{
+    font:inherit;font-size:13px;padding:6px 10px;border:1px solid var(--line);
+    border-radius:9px;color:var(--text);background:#fafbff;
+  }
+  .btns{display:flex;flex-wrap:wrap;gap:8px;}
+  button{
+    font:inherit;font-size:13px;padding:7px 13px;border-radius:9px;
+    border:1px solid var(--line);background:#fafbff;color:var(--text);
+    cursor:pointer;transition:.15s;
+  }
+  button:hover{background:#eef0fb;border-color:#cfd4e8;}
+  button.danger{color:#dc2626;border-color:#fbd5d5;background:#fff5f5;}
+  button.danger:hover{background:#fee2e2;}
+
+  .progress{margin-top:14px;display:flex;align-items:center;gap:12px;}
+  .bar{flex:1;height:10px;border-radius:99px;background:#e9ebf5;overflow:hidden;}
+  .fill{height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .3s;}
+  .ptext{font-size:13px;color:var(--muted);white-space:nowrap;
+    font-variant-numeric:tabular-nums;}
+
+  /* ---------- 图例 ---------- */
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:16px 2px 10px;
+    font-size:12.5px;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  /* ---------- 计划卡片 ---------- */
+  .plan{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media(min-width:760px){ .plan{grid-template-columns:repeat(2,1fr);} }
+  @media(min-width:1080px){ .plan{grid-template-columns:repeat(3,1fr);} }
+
+  .day{background:#fff;border-radius:14px;border:1px solid var(--line);
+    overflow:hidden;box-shadow:0 2px 8px rgba(31,36,48,.04);}
+  .day.today{border-color:var(--brand);
+    box-shadow:0 0 0 2px rgba(79,70,229,.16);}
+  .day-head{display:flex;align-items:center;gap:8px;padding:11px 14px;
+    cursor:pointer;background:#fafbff;border-bottom:1px solid var(--line);
+    user-select:none;}
+  .day-head .num{font-weight:700;font-size:14px;color:var(--brand);}
+  .day-head .date{font-size:12px;color:var(--muted);flex:1;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .day-head .cnt{font-size:11.5px;color:var(--muted);background:#eef0fb;
+    padding:2px 8px;border-radius:99px;white-space:nowrap;}
+  .day-head .arrow{font-size:10px;color:var(--muted);transition:transform .2s;}
+  .day.collapsed .arrow{transform:rotate(-90deg);}
+  .day-body{padding:10px 12px 12px;}
+  .day.collapsed .day-body{display:none;}
+
+  .task{display:flex;align-items:center;gap:9px;padding:8px 10px;
+    border-radius:10px;margin-bottom:7px;cursor:pointer;transition:.15s;}
+  .task:last-child{margin-bottom:0;}
+  .task.new{background:var(--new-bg);}
+  .task.rev{background:var(--rev-bg);}
+  .task:hover{filter:brightness(.97);}
+  .task input{width:18px;height:18px;flex:0 0 auto;margin:0;
+    accent-color:var(--brand);cursor:pointer;}
+  .task .txt{font-size:13.5px;flex:1;min-width:0;}
+  .task .sub{font-size:11.5px;color:var(--muted);}
+  .task.done{opacity:.45;}
+  .task.done .txt{text-decoration:line-through;}
+  .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;
+    white-space:nowrap;flex:0 0 auto;}
+  .badge.new{background:#d1fae5;color:#047857;}
+  .badge.rev{background:#fef3c7;color:#b45309;}
+
+  /* ---------- 说明 ---------- */
+  .notes{margin-top:22px;background:#fff;border:1px solid var(--line);
+    border-radius:14px;padding:16px 18px;font-size:13px;color:#374151;}
+  .notes h2{margin:0 0 8px;font-size:15px;color:var(--brand);}
+  .notes ol{margin:0;padding-left:20px;}
+  .notes li{margin-bottom:5px;}
+
+  /* ---------- 打印 ---------- */
+  @media print{
+    body{background:#fff;padding:0;}
+    header{background:#fff;color:#000;padding:10px 0 4px;}
+    header h1{font-size:18px;}
+    header p{color:#444;}
+    .panel,.legend{display:none;}
+    .wrap{padding:0;}
+    .plan{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .day{break-inside:avoid;box-shadow:none;}
+    .day.collapsed .day-body{display:block;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>70 个考点 · 35 天复习计划表</h1>
+  <p>每天新学 2 个考点（1 组）· 按 +1 / +2 / +4 / +7 / +15 天节点复习</p>
+</header>
+
+<div class="wrap">
+
+  <div class="panel">
+    <div class="row1">
+      <label>开始日期
+        <input type="date" id="startDate">
+      </label>
+      <div class="btns">
+        <button id="expandAll">展开全部</button>
+        <button id="collapseAll">收起全部</button>
+        <button id="resetBtn" class="danger">重置进度</button>
+      </div>
+    </div>
+    <div class="progress">
+      <div class="bar"><div class="fill" id="progressFill"></div></div>
+      <span class="ptext" id="progressText">0 / 0</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#34d399"></i>新学（当天）</span>
+    <span><i class="dot" style="background:#fbbf24"></i>复习（按间隔天数）</span>
+    <span>· 点击卡片标题可折叠 / 展开</span>
+  </div>
+
+  <div id="plan" class="plan"></div>
+
+  <div class="notes">
+    <h2>使用说明</h2>
+    <ol>
+      <li>共 70 个考点，每 2 个一组，共 <b>35 组</b>；第 N 天新学第 N 组（考点 <b>2N-1、2N</b>）。</li>
+      <li>每组在学完后第 <b>+1、+2、+4、+7、+15</b> 天各复习一次，共 5 次。</li>
+      <li>表内只列出 35 天范围内的复习项。第 21~35 组的「+15 天」复习落在第 36~50 天，建议在第 35 天之后自行补做一轮总巩固。</li>
+      <li>每次复习请先<b>合上资料主动回忆</b>，想不起来再看答案，效果远好于反复阅读。</li>
+      <li>勾选进度会自动保存在本机浏览器；换设备或清理缓存会丢失。</li>
+      <li>手机端可「添加到主屏幕」，方便每天打卡。需要纸质版时直接按 Ctrl / Cmd + P 打印。</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ============ 配置 ============ */
+  var TOTAL = 35;                          // 总天数 = 总组数
+  var INTERVALS = [1, 2, 4, 7, 15];        // 复习间隔（天）
+  var KEY = 'ebbinghaus70.v1';
+  var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  /* ============ 状态 ============ */
+  var store = { start: '', done: {} };
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.start) store.start = parsed.start;
+        if (parsed.done && typeof parsed.done === 'object') store.done = parsed.done;
+      }
+    }
+  } catch (e) {}
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+  }
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+
+  /* 默认开始日期 = 今天 */
+  if (!store.start) {
+    var t = new Date();
+    store.start = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    save();
+  }
+
+  /* ============ DOM ============ */
+  var planEl   = document.getElementById('plan');
+  var fillEl   = document.getElementById('progressFill');
+  var textEl   = document.getElementById('progressText');
+  var dateEl   = document.getElementById('startDate');
+  var collapsed = {};
+
+  /* ============ 构建计划数据 ============ */
+  var plan = [];
+  for (var d = 1; d <= TOTAL; d++) {
+    var reviews = [];
+    for (var i = 0; i < INTERVALS.length; i++) {
+      var iv = INTERVALS[i];
+      var g = d - iv;
+      if (g >= 1) reviews.push({ g: g, iv: iv });
+    }
+    plan.push({ day: d, group: d, reviews: reviews });
+  }
+
+  /* ============ 日期工具 ============ */
+  function parseDate(str) {
+    var p = str.split('-');
+    var dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+  }
+  function fmtDate(str, offset) {
+    var dt = parseDate(str);
+    dt.setDate(dt.getDate() + offset);
+    return (dt.getMonth() + 1) + '月' + dt.getDate() + '日 ' + WEEK[dt.getDay()];
+  }
+  function todayDay() {
+    if (!store.start) return -1;
+    var s = parseDate(store.start);
+    var n = new Date();
+    n.setHours(0, 0, 0, 0);
+    var diff = Math.round((n - s) / 86400000);
+    var day = diff + 1;
+    return (day >= 1 && day <= TOTAL) ? day : -1;
+  }
+
+  /* ============ 渲染 ============ */
+  function render() {
+    var today = todayDay();
+    var html = '';
+
+    for (var i = 0; i < plan.length; i++) {
+      var p = plan[i];
+      var g = p.group;
+      var isToday = (today === p.day);
+      var dateStr = store.start ? fmtDate(store.start, p.day - 1) : '';
+      var parts = '';
+
+      /* 新学任务 */
+      var nid = 'n' + g;
+      var nDone = !!store.done[nid];
+      parts +=
+        '<label class="task new' + (nDone ? ' done' : '') + '" data-id="' + nid + '">' +
+          '<input type="checkbox"' + (nDone ? ' checked' : '') + '>' +
+          '<span class="badge new">新学</span>' +
+          '<span class="txt">考点 ' + (2 * g - 1) + '、' + (2 * g) +
+            '<span class="sub"> · 第 ' + g + ' 组</span></span>' +
+        '</label>';
+
+      /* 复习任务 */
+      for (var j = 0; j < p.reviews.length; j++) {
+        var r = p.reviews[j];
+        var rid = 'r' + r.g + '_' + r.iv;
+        var rDone = !!store.done[rid];
+        parts +=
+          '<label class="task rev' + (rDone ? ' done' : '') + '" data-id="' + rid + '">' +
+            '<input type="checkbox"' + (rDone ? ' checked' : '') + '>' +
+            '<span class="badge rev">+' + r.iv + '天</span>' +
+            '<span class="txt">第 ' + r.g + ' 组 · 考点 ' +
+              (2 * r.g - 1) + '、' + (2 * r.g) + '</span>' +
+          '</label>';
+      }
+
+      html +=
+        '<section class="day' + (isToday ? ' today' : '') +
+          (collapsed[p.day] ? ' collapsed' : '') + '" data-day="' + p.day + '">' +
+          '<div class="day-head">' +
+            '<span class="num">Day ' + p.day + '</span>' +
+            '<span class="date">' + (dateStr || (isToday ? '今天' : '')) + '</span>' +
+            '<span class="cnt">' + (1 + p.reviews.length) + ' 项</span>' +
+            '<span class="arrow">▼</span>' +
+          '</div>' +
+          '<div class="day-body">' + parts + '</div>' +
+        '</section>';
+    }
+
+    planEl.innerHTML = html;
+    updateProgress();
+  }
+
+  /* ============ 进度统计 ============ */
+  function updateProgress() {
+    var done = 0, total = 0;
+    for (var i = 0; i < plan.length; i++) {
+      var p = plan[i];
+      total++;
+      if (store.done['n' + p.group]) done++;
+      for (var j = 0; j < p.reviews.length; j++) {
+        total++;
+        if (store.done['r' + p.reviews[j].g + '_' + p.reviews[j].iv]) done++;
+      }
+    }
+    var pct = total ? Math.round(done / total * 100) : 0;
+    fillEl.style.width = pct + '%';
+    textEl.textContent = done + ' / ' + total + ' 项 · ' + pct + '%';
+  }
+
+  /* ============ 事件：勾选 ============ */
+  planEl.addEventListener('change', function (e) {
+    var input = e.target;
+    if (!input || input.type !== 'checkbox') return;
+    var task = input.closest ? input.closest('.task') : null;
+    if (!task) return;
+    var id = task.getAttribute('data-id');
+
+    if (input.checked) { store.done[id] = 1; }
+    else { delete store.done[id]; }
+
+    if (input.checked) task.classList.add('done');
+    else task.classList.remove('done');
+
+    save();
+    updateProgress();
+  });
+
+  /* ============ 事件：折叠 ============ */
+  planEl.addEventListener('click', function (e) {
+    var head = e.target.closest ? e.target.closest('.day-head') : null;
+    if (!head) return;
+    var sec = head.parentElement;
+    var day = Number(sec.getAttribute('data-day'));
+    sec.classList.toggle('collapsed');
+    if (sec.classList.contains('collapsed')) collapsed[day] = true;
+    else delete collapsed[day];
+  });
+
+  /* ============ 事件：按钮 ============ */
+  document.getElementById('expandAll').addEventListener('click', function () {
+    collapsed = {};
+    var all = planEl.querySelectorAll('.day');
+    for (var i = 0; i < all.length; i++) all[i].classList.remove('collapsed');
+  });
+
+  document.getElementById('collapseAll').addEventListener('click', function () {
+    var all = planEl.querySelectorAll('.day');
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.add('collapsed');
+      collapsed[Number(all[i].getAttribute('data-day'))] = true;
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (!confirm('确定要清空所有勾选进度吗？此操作不可撤销。')) return;
+    store.done = {};
+    save();
+    render();
+  });
+
+  /* ============ 事件：开始日期 ============ */
+  dateEl.value = store.start;
+  dateEl.addEventListener('change', function () {
+    if (!dateEl.value) return;
+    store.start = dateEl.value;
+    save();
+    render();
+  });
+
+  /* ============ 启动 ============ */
+  render();
+
+})();
+</script>
+
+</body>
+</html>
